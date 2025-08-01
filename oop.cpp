@@ -1,4 +1,4 @@
-// I know that I should use functions to make main function more better
+// I know that I should use functions to make main function more better,but wait my advanced 
 #include <iostream>
 #include <vector>
 #include <string>
