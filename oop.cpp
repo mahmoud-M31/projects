@@ -1,3 +1,4 @@
+// I know that I should use functions to make main function more better
 #include <iostream>
 #include <vector>
 #include <string>
