@@ -1,3 +1,3 @@
-this is the frist object about oop by c++
-the idea about this project is parking and soon I will make a database about this idea and connect with other
-if you see any bugs or you have some changes that make me better I will happy if you tell me
+In this page I want to tell you that I am student and I try to be a good programmer 
+you will find in this repository projects which I try to make them better 
+c++ this is language which I learn fundamentals of programming by it ,but maybe I learn python 
