@@ -1,0 +1,169 @@
+select * into layoffs2
+from layoffs
+
+select *from layoffs2
+
+select distinct company
+from layoffs2
+order by company
+
+select distinct industry-- has a null value and null as a string
+from layoffs2 l
+order by industry
+
+select distinct l.date -- MM/DD/YYY not DD/MM/YYYY and data type is text
+from layoffs2 l
+
+select distinct l.funds_raised_millions-- data type not numeric
+from layoffs2 l
+order by funds_raised_millions
+
+select distinct l.country    -- united states has two different values
+from layoffs2 l
+order by country
+
+select distinct l.location-- malmo and Malmö are the same  and delete non-U.S.
+from layoffs2 l
+order by location
+ 
+ select distinct l.percentage_laid_off-- has a string value=null
+from layoffs2 l
+order by l.percentage_laid_off
+
+select distinct l.stage-- a value as unknown as string 
+from layoffs2 l
+order by l.stage
+
+select distinct l.total_laid_off--has a string value=null data type not numerical
+from layoffs2 l
+order by total_laid_off
+
+with RemDub as(  --  A CTE to find dublicates
+select * ,row_number()over (partition by company,industry,date,funds_raised_millions,country
+, location,percentage_laid_off,stage,total_laid_off order by company)as dublicates
+from layoffs2 
+)--  there exist Dublicates 
+
+delete from RemDub 
+where dublicates>1---Now there don't exist dublicates
+ 
+ 
+ --Now I will try to convert columns's data type
+ update layoffs2
+ set funds_raised_millions=null 
+ where funds_raised_millions='NULL'
+
+alter table layoffs2 
+alter column funds_raised_millions decimal(10,2)
+
+
+ update layoffs2
+ set percentage_laid_off=null 
+ where percentage_laid_off='NULL'
+
+ alter table layoffs2
+ alter column percentage_laid_off DECIMAL(5,4)
+
+ 
+SELECT l.date-- to find the wrong value
+FROM layoffs2 l
+WHERE TRY_CONVERT(date, l.date) IS NULL
+      AND l.date IS NOT NULL;
+
+update layoffs2      --because the column date not allows null 
+set date='01-01-2000'-- I made all the null values 01-01-2000 as a unique date 
+ where date='NULL'				
+ 
+ update layoffs2 
+ set date =CONVERT(date ,date ,101)
+  
+  alter table layoffs2
+  alter column date DATE;
+
+SELECT l.total_laid_off-- to find the wrong value
+FROM layoffs2 l
+WHERE TRY_CONVERT(decimal(10,2), l.total_laid_off) IS NULL
+      AND l.total_laid_off IS NOT NULL;
+
+	   update layoffs2
+ set total_laid_off=null 
+ where total_laid_off='NULL'
+
+alter table layoffs2 
+alter column total_laid_off decimal(10,2)
+
+--Now I must to check the dublicates values for each column
+select distinct *--E inc. Impossible Foods copy delete copy ,Olive AI delete AI
+from layoffs2 l
+
+
+update layoffs2
+set company=case
+when company like '%.'then RTRIM(company,'.')
+when company like 'Impossible Foods%'then 'Impossible Foods'
+when company like 'Olive%'then 'Olive'
+else company
+end;
+
+select distinct location --replace Non-U.S. by international
+from layoffs2
+order by location
+
+update layoffs2
+set location=case
+when location like 'Non-U.S%'then 'International'
+else location
+end;
+
+select distinct industry --null as a string and  Crypto to CryptoCurrency
+from layoffs2
+order by industry
+
+update layoffs2
+set industry=case
+when industry = 'Null' or industry='Other' then null
+when industry like'Crypto%'then 'Cryptocurrency'
+else industry
+end;
+
+select distinct stage --null as a string and Unknown
+from layoffs2
+order by stage
+
+update layoffs2
+set stage=case 
+when stage ='NULL' or stage='Unknown'then 'Undefined'
+else stage 
+end; 
+
+select distinct country --United States.
+from layoffs2
+order by country
+
+update layoffs2
+set country=case 
+when country like'United States%'then 'United States'
+else country
+end;
+
+--Now dealing with a NULL values at the text columns
+update layoffs2
+set industry=(select top 1 l.industry
+from layoffs2 l
+where l.company=layoffs2.company 
+and l.industry is not null 
+)
+where industry is null
+
+--Now delete spaces from start and end
+update layoffs2
+set company=LTRIM(RTRIM(company)),
+location=LTRIM(RTRIM(location)),
+industry=LTRIM(RTRIM(industry)),
+stage=LTRIM(RTRIM(stage)),
+country=LTRIM(RTRIM(country));
+
+
+
+
+
